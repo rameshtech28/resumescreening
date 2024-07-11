@@ -2,7 +2,6 @@ import streamlit as st
 import base64
 import PyPDF2 as pdf
 import oci
-# from streamlit_tags import st_tags
 from langchain.chains import LLMChain
 from langchain_community.llms import OCIGenAI
 from langchain_core.prompts import PromptTemplate
@@ -56,7 +55,7 @@ def initialize_llm(temperature=0, top_p=0, top_k=0, max_tokens=2000):
 
     return llm
 
-def get_model_response(llm, text, description,retriever):
+def get_model_response(llm, text, description):
     template = """
     Act like a skilled or very experienced ATS (Application Tracking System)
     with a deep understanding of the tech field, software engineering, data science, data analysis,
@@ -91,14 +90,9 @@ def get_model_response(llm, text, description,retriever):
 
     prompt = PromptTemplate.from_template(template)
 
-    chain = (
-                    {"resume": retriever, "description": RunnablePassthrough()}
-                    | prompt
-                    | llm
-                    | StrOutputParser()
-            )
-    # chain = LLMChain(llm=llm, prompt=prompt)
-    response = chain.invoke(description)
+    chain = LLMChain(llm=llm, prompt=prompt)
+    
+    response = chain.invoke({"resume": text, "description": jd})
     return response
 
 def input_pdf_text(uploaded_file):
@@ -123,14 +117,6 @@ def extract_percentage(response_text):
         return int(match.group(1))
     return 0
 
-def is_job_title_matching(response_text):
-    match = re.search(r'\*\*Job Title Match:([^\n]*)', response_text)
-    print("type",type(match))
-    print(match)
-    # if match and "does not match the job title" not in match.group(1).strip().lower() or "not matching the job description" not in match.group(1).strip().lower():
-    #     return True
-    # return False
-
 def extract_info(response):
     job_desc_match = re.search(r'Job description Match:\s*(\d+)%', response)
     job_title_match = re.search(r'Job Title Match:\s*(.*)', response)
@@ -151,9 +137,6 @@ def extract_info(response):
     return info
 
 def create_folder(pdf_upload_folder_path):
-    # Specify the path for the new folder
-    # pdf_upload_folder_path = "./Uploaded_resumes/."
-
     # Check if the folder already exists
     if not os.path.exists(pdf_upload_folder_path):
         # Create the directory
@@ -181,13 +164,12 @@ def tag(text, color):
 
 
 # Streamlit app
-st.title("Smart ATS")
-st.text("Compare Resume with Job description ATS")
+st.title("📑Smart ATS  Resume Matcher")
+st.subheader("Compare Resume with Job description ATS", divider='rainbow')
 jd = st.text_area("Paste the Job Description",height = 200)
 uploaded_files = st.file_uploader("Upload Your Resumes", type="pdf", accept_multiple_files=True, help="Please upload the pdf files")
 
 submit = st.button("Submit")
-
 if submit:
     if uploaded_files is not None:
         llm = initialize_llm(temperature=0)
@@ -200,13 +182,11 @@ if submit:
             try:
                 filename = uploaded_file.name
                 with st.expander(f"Response for {filename}",expanded=True):
-                    # print(uploaded_file.name)
                     uploaded_file_name = uploaded_file.name
                     Save_pdf_file_path = pdf_upload_folder_path+uploaded_file_name                
 
                     with open(Save_pdf_file_path,"wb") as f:
-                        f.write(uploaded_file.getbuffer())           
-                    
+                        f.write(uploaded_file.getbuffer()) 
 
                     pdf_name_without_ext = uploaded_file_name.rstrip('.pdf')
                     print("pdf_name_without_ext",pdf_name_without_ext)
@@ -214,54 +194,32 @@ if submit:
                     text = input_pdf_text(uploaded_file)
 
                     text_file_path = f"{pdf_name_without_ext}.txt"
-
-                    # print("text_file_path",text_file_path)
-            
-                    # Save the extracted text to the text file
-                    save_text_to_file(text, text_file_path)
                     
+                    response_dict = get_model_response(llm, text, jd)
+                    response = response_dict["text"]                        
+                       
+                    show_pdf(Save_pdf_file_path)
+                    # st.write(response)
+                    
+                    info = extract_info(response)
+                    
+                    match_percentage = int(info.get("Job description Match"))
+                    if match_percentage:
+                        st.subheader(f"Percentage Match: {match_percentage}%") 
+                        progress_bar = st.progress(match_percentage)
 
-                    loader = TextLoader(text_file_location+text_file_path)
-                    documents = loader.load()
+                    Job_Title_Match = info.get("Job Title Match")
+                    if Job_Title_Match:                        
+                        st.subheader(f"Job Title Match: ")    
+                        st.write(Job_Title_Match)                             
 
-                    # print("documents",documents)
-                    if documents is not None:
-                        text_splitter = RecursiveCharacterTextSplitter(
-                            chunk_size=1000,
-                            chunk_overlap=200,
-                            length_function=len
-                        )
-                        chunks = text_splitter.split_documents(documents)
+                    Matching_Keywords = info.get("Matching Keywords").split(",")
+                    Missing_Keywords = info.get("Missing Keywords").split(",")
 
-                        client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config)
-                        embeddings = OCIGenAIEmbeddings(
-                            model_id="cohere.embed-english-light-v3.0",
-                            service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
-                            compartment_id="ocid1.compartment.oc1..aaaaaaaalnzl6zjv5aarhl32amczyeqwl7ahxnzqxwjpzppb74e7ubouzn4a",
-                            client=client
-                        )
+                    keywords_green = clean_list(Matching_Keywords)
+                    keywords_red = clean_list(Missing_Keywords) 
 
-                        VectorStore = FAISS.from_documents(chunks, embeddings)
-                        retriever = VectorStore.as_retriever()
-                        response = get_model_response(llm, text, jd,retriever)
-                        
-                        # with st.expander(f"Response for {filename}",expanded=True):
-                        show_pdf(Save_pdf_file_path)
-                        st.write(response)
-                        print("response type",type(response))
-                        info = extract_info(response)
-                        # for key, value in info.items():
-                        #     print(f"{key}: {value}")
-
-                        Matching_Keywords = info.get("Matching Keywords").split(",")
-                        Missing_Keywords = info.get("Missing Keywords").split(",")
-
-                        keywords_green = clean_list(Matching_Keywords)
-                        keywords_red = clean_list(Missing_Keywords)
-
-                        # st.write("keywords_green",keywords_green)
-                        # st.write("keywords_red",keywords_red)                      
-
+                    if keywords_green:
                         # Create a container div for green tags
                         green_tags_container = '<div style="display: flex; flex-wrap: wrap;">'
 
@@ -272,6 +230,11 @@ if submit:
                         # Close the green tags container div
                         green_tags_container += '</div>'
 
+                        # Display the green tags container
+                        st.subheader("Matching keywords", divider='rainbow')
+                        st.markdown(green_tags_container, unsafe_allow_html=True)
+
+                    if keywords_red:
                         # Create a container div for red tags
                         red_tags_container = '<div style="display: flex; flex-wrap: wrap;">'
 
@@ -280,38 +243,24 @@ if submit:
                             red_tags_container += tag(keyword, 'red')
 
                         # Close the red tags container div
-                        red_tags_container += '</div>'
-
-                        # Display the green tags container
-                        st.subheader("Matching keywords")
-                        st.markdown(green_tags_container, unsafe_allow_html=True)
+                        red_tags_container += '</div>'                    
 
                         # Display the red tags container
-                        st.subheader("Missing keywords")
-                        st.markdown(red_tags_container, unsafe_allow_html=True)                                                
+                        st.subheader("Missing keywords", divider='rainbow')
+                        st.markdown(red_tags_container, unsafe_allow_html=True)     
+
+                    Profile_Summary = info.get("Profile Summary")
+                    if Profile_Summary:
+                        st.subheader("Profile Summary", divider='rainbow')                     
+                        Profile_Summary = Profile_Summary.replace("-","\n-")
+                        st.markdown(Profile_Summary)  
+
+                    Reason_for_percentage_match = info.get("Reason for percentage match")
+                    if Reason_for_percentage_match:
+                        Reason_for_percentage_match = Reason_for_percentage_match.replace("-","\n-")
+                        st.subheader("Reason for percentage match", divider='rainbow') 
+                        st.markdown(Reason_for_percentage_match)                                         
 
             except Exception as e:
                 st.error(e)
-                print(e) 
-
-            # percentage = extract_percentage(response["text"])
-            
-        #     if is_job_title_matching(response["text"]):
-        #         matching_responses.append((uploaded_file.name, response["text"], percentage))
-        #     else:
-        #         non_matching_responses.append((uploaded_file.name, response["text"], percentage))
-        
-        # # Sort responses based on the percentage match
-        # matching_responses.sort(key=lambda x: x[2], reverse=True)
-        
-        # st.header("Matching Candidates")
-        # for filename, response_text, percentage in matching_responses:
-        #     with st.expander(f"Response for {filename} - Match: {percentage}%"):            
-        #         st.subheader(f"Response for {filename}")
-        #         st.write(response_text)
-        
-        # st.header("Non-Matching Candidates")
-        # for filename, response_text, percentage in non_matching_responses:
-        #     with st.expander(f"Response for {filename} - Not Matching"):
-        #         st.subheader(f"Response for {filename}")
-        #         st.write(response_text)
+                print(e)             
