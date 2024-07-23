@@ -208,7 +208,7 @@ def main():
     # Display content based on selected tab
     if selected_tab == "Chatbot":
         # Display current chat history
-        st.subheader("Chatbot 🤖")
+        st.subheader("🤖Chatbot")
         c.execute(
         f'''CREATE TABLE IF NOT EXISTS {DATABASE_NAME} (session_id TEXT, AI_message TEXT, Human_message TEXT, date_val TEXT) ''')
 
