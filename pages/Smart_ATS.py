@@ -17,10 +17,10 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 st.sidebar.page_link("streamlit_app.py", label="Home", icon="🏠")
-st.sidebar.page_link("pages/Job Postings Authoring.py", label="Job Postings Authoring", icon="📑")
+st.sidebar.page_link("pages/Job Postings Authoring.py", label="Job Postings Authoring", icon="💼")
 st.sidebar.page_link("pages/Smart_ATS.py", label="Smart ATS", icon="📑")
 st.sidebar.page_link("pages/Chatbot.py", label="Chatbot", icon="🤖")
-st.sidebar.page_link("pages/Chatbot_FAQ.py", label="Chatbot with FAQ", icon="🤖")
+st.sidebar.page_link("pages/Chatbot_FAQ.py", label="Help Desk", icon="📜")
 
 
 # Load secrets from Streamlit
@@ -66,13 +66,17 @@ def initialize_llm(temperature=0, top_p=0, top_k=0, max_tokens=2000):
 def get_model_response(llm, text, description):
     template = """
     Act like a skilled or very experienced ATS (Application Tracking System)
-    with a deep understanding of the tech field, software engineering, data science, data analysis,
+    with a deep understanding of the tech field, Human Resource, software engineering, data science, data analysis, Quality Aanalytics
     and big data engineering. Your task is to evaluate the resume based on the given job description.
     You must consider the job market is very competitive and you should provide
-    the best assistance for selecting the resume. Assign the percentage Matching based
-    on Job description and the missing keywords in resume by comparing job description with high accuracy also give the matching keywords with high accuracy 
+    the best assistance for comparing the resume. 
+    Assign the percentage Matching based on Job description and resume match.    
+    also find the Job title from resume and Match the job title role with job description high accuracy if Job title not matches then simply said job title is not match with this profile.
+    also give the matching keywords by comparing resume and job description with high accuracy which are related to technical skills. If keywords present and matches in both resume and job description then only you consider keyword is matched. otherwise consider keyword is not matches.  
+    and give the missing keywords which is not present in resume by comparing job description with high accuracy. Find the technical missing keywords. 
+    
     and also give the reason for the percentage match in bullet points with higher accuracy.
-    also Match the job title with high accuracy.
+    
     If any job profile resume is not matching with the job description then simply say not matching the job description 
     resume: {resume}
     description: {description}
@@ -100,7 +104,7 @@ def get_model_response(llm, text, description):
 
     chain = LLMChain(llm=llm, prompt=prompt)
     
-    response = chain.invoke({"resume": text, "description": jd})
+    response = chain.invoke({"resume": text, "description": description})
     return response
 
 def input_pdf_text(uploaded_file):
