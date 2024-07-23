@@ -75,7 +75,7 @@ def generate_job_posting(job_title, responsibilities, qualifications, success_cr
     return response
 
 # Streamlit form for job postings
-st.title("Job Postings Authoring")
+st.title("💼Job Postings Authoring")
 
 job_title = st.text_input("Job Title")
 responsibilities = st.text_area("Responsibilities")
