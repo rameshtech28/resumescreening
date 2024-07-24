@@ -70,7 +70,7 @@ def get_model_response(llm, text, description):
     and big data engineering. Your task is to evaluate the resume based on the given job description.
     You must consider the job market is very competitive and you should provide the best assistance for comparing the resume. 
     
-    If job title is not matching then assign matching percentage to less than 20 percentage only. Assign the percentage Matching based only on Job title with job description  and resume with job title match. 
+    Assign the percentage Matching based only on Job description and resume with job title match. If job title is not matching then assign matching percentage to less than 20 percentage only 
     also find the Job title from resume and Match the job title role with job description high accuracy if Job title not matches then simply said job title is not match with this profile.
     
     also give the matching keywords by comparing resume and job description with high accuracy which are related to technical skills. If keywords present and matches in both resume and job description then only you consider keyword is matched. otherwise consider keyword is not matches.  
