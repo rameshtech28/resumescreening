@@ -7,8 +7,8 @@ import oci
 st.sidebar.page_link("streamlit_app.py", label="Home", icon="🏠")
 st.sidebar.page_link("pages/Job Postings Authoring.py", label="Job Postings Authoring", icon="💼")
 st.sidebar.page_link("pages/Smart_ATS.py", label="Smart ATS", icon="📑")
-st.sidebar.page_link("pages/Chatbot.py", label="Chatbot", icon="🤖")
-st.sidebar.page_link("pages/Chatbot_FAQ.py", label="Help Desk", icon="📜")
+# st.sidebar.page_link("pages/Chatbot.py", label="Chatbot", icon="🤖")
+# st.sidebar.page_link("pages/Chatbot_FAQ.py", label="Help Desk", icon="📜")
 
 # Load secrets from Streamlit
 CONFIG_PROFILE = st.secrets["CONFIG_PROFILE"]
