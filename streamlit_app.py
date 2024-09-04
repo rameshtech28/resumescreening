@@ -32,10 +32,6 @@ welcome_message = """
   Be able to locate a list of resumes matching certain keywords, qualifications, geographies, job duties, etc. 
   that quickly helps narrow the search for candidates.  Be able to match a list of resumes to job postings.
     
-
-  Use Case 3: Help Desk Knowledge Base: QnA
-  Be able to construct knowledge base articles to answer frequently asked questions and or ask questions of a set of knowledgebase articles.
- 
   
   ##### Solution:
   💼Job Postings Authoring: Created AI assistant by Using OCI Generative AI service.
@@ -46,11 +42,6 @@ welcome_message = """
   📑Smart ATS(Application Tracking System): It will helps HR to Compare Job description with number of resumes
   to check Job Percentage Match with Job description, Matching keywords and Missing keywords,Profile Summary and Reason for percentage match. 
   
-  
-  🤖Chatbot: It will help Keyword Search/Resumes. We need upload resumes and ask questions.
-  
-  
-  📜Help Desk Knowledge Base QnA: We need upload policy document pdf file ask questions.
 
 
   Please make sure to check the sidebar for more useful information. 💡
