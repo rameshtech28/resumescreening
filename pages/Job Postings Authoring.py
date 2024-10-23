@@ -36,7 +36,7 @@ def initialize_llm(temperature=0, top_p=0, top_k=0, max_tokens=2000):
     try:
         client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config)
         llm = OCIGenAI(
-            model_id="cohere.command-r-plus",
+            model_id="cohere.command-r-16k",
             service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
             compartment_id=COMPARTMENT_ID,
             model_kwargs={"temperature": temperature, "top_p": top_p, "top_k": top_k, "max_tokens": max_tokens},
