@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain.chains import LLMChain
-from langchain_community.llms import OCIGenAI
+from langchain_community.llms import ChatOCIGenAI
 from langchain_core.prompts import PromptTemplate
 
 import oci
@@ -35,7 +35,7 @@ config = {
 def initialize_llm(temperature=0, top_p=0, top_k=0, max_tokens=2000):
     try:
         client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config)
-        llm = OCIGenAI(
+        llm = ChatOCIGenAI(
             model_id="cohere.command-r-16k",
             service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
             compartment_id=COMPARTMENT_ID,
