@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain.chains import LLMChain
-from langchain_community.llms import ChatOCIGenAI
+from langchain_community.chat_models import ChatOCIGenAI
 from langchain_core.prompts import PromptTemplate
 
 import oci
