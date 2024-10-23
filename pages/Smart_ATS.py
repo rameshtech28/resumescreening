@@ -4,7 +4,7 @@ import PyPDF2 as pdf
 from streamlit_pdf_viewer import pdf_viewer
 import oci
 from langchain.chains import LLMChain
-from langchain_community.llms import OCIGenAI
+from langchain_community.chat_models import ChatOCIGenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -50,7 +50,7 @@ text_file_location = "./Generated_text_from_resumes/"
 def initialize_llm(temperature=0, top_p=0, top_k=0, max_tokens=2000):
     try:
         client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config)
-        llm = OCIGenAI(
+        llm = ChatOCIGenAI(
             model_id="cohere.command",
             service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
             compartment_id=COMPARTMENT_ID,
