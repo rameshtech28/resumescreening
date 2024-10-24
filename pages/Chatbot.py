@@ -15,7 +15,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.memory.buffer import ConversationBufferMemory
 # from langchain import PromptTemplate, FewShotPromptTemplate
 
-from langchain_community.llms import OCIGenAI
+from langchain_community.chat_models import ChatOCIGenAI
 from langchain_community.embeddings import OCIGenAIEmbeddings
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_community.vectorstores import FAISS
@@ -86,7 +86,7 @@ def initialize_llm(temperature=0.0,top_p=0,top_k=0,max_tokens=200):
     try:
         client = oci.generative_ai_inference.GenerativeAiInferenceClient(config=config)    
         
-        llm =  OCIGenAI(
+        llm =  ChatOCIGenAI(
             model_id="cohere.command",
             service_endpoint="https://inference.generativeai.us-chicago-1.oci.oraclecloud.com",
             compartment_id=COMPARTMENT_ID,
